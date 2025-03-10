@@ -76,23 +76,119 @@
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(20px);
             z-index: 100;
-            padding: 16px 0;
+            padding: 24px 0;
             border-bottom: 1px solid rgba(0,0,0,0.05);
+            overflow: hidden;
         }
 
         .header-content {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 24px;
+            position: relative;
+            height: 80px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
         }
 
         .title-group {
             display: flex;
-            align-items: baseline;
-            gap: 12px;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .icon-mosaic {
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            overflow: hidden;
+            opacity: 0.06;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .mosaic-icon {
+            position: absolute;
+            transform-origin: center;
+            border-radius: 6px;
+        }
+
+        .floating-icons {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 16px;
+            z-index: 1;
+        }
+
+        .floating-icon {
+            width: 24px;
+            height: 24px;
+            opacity: 0.2;
+            animation: float-icon 3s ease-in-out infinite;
+        }
+
+        .floating-icon:nth-child(2n) {
+            animation-delay: 0.5s;
+        }
+
+        .floating-icon:nth-child(3n) {
+            animation-delay: 1s;
+        }
+
+        @keyframes float-icon {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-10px) rotate(5deg);
+            }
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-color), #0077ed);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            margin-right: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-icon::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 0%,
+                rgba(255,255,255,0.1) 50%,
+                transparent 100%
+            );
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: rotate(0) translate(-50%, -50%);
+            }
+            100% {
+                transform: rotate(360deg) translate(-50%, -50%);
+            }
         }
 
         .page-title {
@@ -572,9 +668,17 @@
 <body>
     <header class="header-section">
         <div class="header-content">
+            <div class="icon-mosaic" id="iconMosaic">
+                <!-- 图标将通过JavaScript动态生成 -->
+        </div>
             <div class="title-group">
-                <h1 class="page-title">标哥</h1>
-                <p class="page-subtitle">牵图标回家，哥</p>
+                <div class="brand-icon">
+                    <span class="material-icons">widgets</span>
+                </div>
+                    <div>
+                    <h1 class="page-title">标哥</h1>
+                    <p class="page-subtitle">找图标，杠杠的</p>
+                </div>
             </div>
         </div>
     </header>
@@ -599,8 +703,8 @@
                                     <option value="64" selected>64 × 64 像素</option>
                                     <option value="128">128 × 128 像素</option>
                                     <option value="256">256 × 256 像素</option>
-                                </select>
-                            </div>
+                        </select>
+                    </div>
                         </div>
                         <div class="option-group">
                             <label class="option-label">图标格式</label>
@@ -609,20 +713,20 @@
                                     <option value="png" selected>PNG — 最佳质量，支持透明</option>
                                     <option value="webp">WebP — 高压缩，现代浏览器</option>
                                     <option value="jpeg">JPEG — 兼容性最好</option>
-                                </select>
-                            </div>
-                        </div>
+                        </select>
+                    </div>
+                </div>
                     </div>
                     <button type="submit" class="theme-button w-full">
                         <span class="material-icons">search</span>
                         开始搜索
-                    </button>
-                </form>
+                </button>
+            </form>
             </section>
 
             <div id="results" class="results-grid">
-                <!-- 结果将在这里显示 -->
-            </div>
+            <!-- 结果将在这里显示 -->
+        </div>
         </main>
 
         <section class="features-section">
@@ -678,14 +782,166 @@
                         <h3 class="feature-title">全平台支持</h3>
                         <p class="feature-description">基于浏览器的解决方案，支持所有主流平台和设备。无需下载安装任何软件，随时随地都能使用。</p>
                     </div>
+                    </div>
                 </div>
-            </div>
         </section>
     </div>
 
     <canvas id="conversionCanvas" style="display: none;"></canvas>
 
     <script>
+        // 在现有脚本的开头添加以下代码
+        const iconUrls = [
+            'https://logo.clearbit.com/apple.com',
+            'https://logo.clearbit.com/google.com',
+            'https://logo.clearbit.com/microsoft.com',
+            'https://logo.clearbit.com/amazon.com',
+            'https://logo.clearbit.com/facebook.com',
+            'https://logo.clearbit.com/netflix.com',
+            'https://logo.clearbit.com/spotify.com',
+            'https://logo.clearbit.com/twitter.com',
+            'https://logo.clearbit.com/linkedin.com',
+            'https://logo.clearbit.com/github.com',
+            'https://logo.clearbit.com/adobe.com',
+            'https://logo.clearbit.com/airbnb.com',
+            'https://logo.clearbit.com/alibaba.com',
+            'https://logo.clearbit.com/android.com',
+            'https://logo.clearbit.com/baidu.com',
+            'https://logo.clearbit.com/bing.com',
+            'https://logo.clearbit.com/dropbox.com',
+            'https://logo.clearbit.com/ebay.com',
+            'https://logo.clearbit.com/firefox.com',
+            'https://logo.clearbit.com/github.com',
+            'https://logo.clearbit.com/instagram.com',
+            'https://logo.clearbit.com/intel.com',
+            'https://logo.clearbit.com/medium.com',
+            'https://logo.clearbit.com/nintendo.com',
+            'https://logo.clearbit.com/nvidia.com',
+            'https://logo.clearbit.com/paypal.com',
+            'https://logo.clearbit.com/pinterest.com',
+            'https://logo.clearbit.com/reddit.com',
+            'https://logo.clearbit.com/samsung.com',
+            'https://logo.clearbit.com/slack.com',
+            'https://logo.clearbit.com/snapchat.com',
+            'https://logo.clearbit.com/sony.com',
+            'https://logo.clearbit.com/steam.com',
+            'https://logo.clearbit.com/telegram.org',
+            'https://logo.clearbit.com/tencent.com',
+            'https://logo.clearbit.com/tesla.com',
+            'https://logo.clearbit.com/tiktok.com',
+            'https://logo.clearbit.com/twitch.tv',
+            'https://logo.clearbit.com/uber.com',
+            'https://logo.clearbit.com/unity.com',
+            'https://logo.clearbit.com/vimeo.com',
+            'https://logo.clearbit.com/visa.com',
+            'https://logo.clearbit.com/walmart.com',
+            'https://logo.clearbit.com/whatsapp.com',
+            'https://logo.clearbit.com/xiaomi.com',
+            'https://logo.clearbit.com/yahoo.com',
+            'https://logo.clearbit.com/youtube.com',
+            'https://logo.clearbit.com/zoom.us'
+        ];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function createMosaicBackground() {
+            const container = document.getElementById('iconMosaic');
+            const containerRect = container.getBoundingClientRect();
+            
+            // 清空现有内容
+            container.innerHTML = '';
+            
+            // 计算网格布局参数
+            const gridGap = 20;
+            const minIconSize = 16;
+            const maxIconSize = 40;
+            const columns = Math.ceil(containerRect.width / (maxIconSize + gridGap));
+            const rows = Math.ceil(containerRect.height / (maxIconSize + gridGap));
+            const totalCells = columns * rows;
+            
+            // 创建不重复的图标数组
+            let availableIcons = [...iconUrls];
+            let usedIcons = new Set();
+            let currentIcons = [];
+            
+            // 确保每个相邻位置的图标都不相同
+            for (let i = 0; i < totalCells; i++) {
+                // 如果可用图标用完了，重新填充（但排除已经在邻近位置使用的图标）
+                if (availableIcons.length === 0) {
+                    availableIcons = iconUrls.filter(icon => !usedIcons.has(icon));
+                    usedIcons.clear();
+                }
+                
+                // 获取当前位置的邻近位置
+                const row = Math.floor(i / columns);
+                const col = i % columns;
+                const neighbors = new Set();
+                
+                // 检查上、左、右位置的图标
+                if (row > 0 && currentIcons[(row - 1) * columns + col]) {
+                    neighbors.add(currentIcons[(row - 1) * columns + col]);
+                }
+                if (col > 0 && currentIcons[row * columns + (col - 1)]) {
+                    neighbors.add(currentIcons[row * columns + (col - 1)]);
+                }
+                if (col < columns - 1 && currentIcons[row * columns + (col + 1)]) {
+                    neighbors.add(currentIcons[row * columns + (col - 1)]);
+                }
+                
+                // 从可用图标中筛选出不在邻近位置的图标
+                const validIcons = availableIcons.filter(icon => !neighbors.has(icon));
+                
+                // 如果没有合适的图标，使用任何未在邻近使用的图标
+                const selectedIcon = validIcons.length > 0 
+                    ? validIcons[Math.floor(Math.random() * validIcons.length)]
+                    : availableIcons[Math.floor(Math.random() * availableIcons.length)];
+                
+                // 记录使用的图标
+                currentIcons.push(selectedIcon);
+                usedIcons.add(selectedIcon);
+                availableIcons = availableIcons.filter(icon => icon !== selectedIcon);
+                
+                // 创建图标元素
+                const img = document.createElement('img');
+                img.className = 'mosaic-icon';
+                img.src = selectedIcon;
+                img.alt = 'icon';
+                
+                // 计算位置和大小
+                const size = minIconSize + Math.random() * (maxIconSize - minIconSize);
+                const offsetX = Math.random() * gridGap - gridGap / 2;
+                const offsetY = Math.random() * gridGap - gridGap / 2;
+                
+                const left = (col * (maxIconSize + gridGap)) + offsetX;
+                const top = (row * (maxIconSize + gridGap)) + offsetY;
+                
+                img.style.width = `${size}px`;
+                img.style.height = `${size}px`;
+                img.style.left = `${left}px`;
+                img.style.top = `${top}px`;
+                
+                // 添加随机旋转和动画效果
+                const rotation = Math.random() * 60 - 30;
+                img.style.transform = `rotate(${rotation}deg)`;
+                img.style.opacity = 0.4 + Math.random() * 0.6;
+                img.style.animation = `fadeIn 0.5s ease-out ${Math.random() * 0.5}s backwards`;
+                
+                container.appendChild(img);
+            }
+        }
+
+        // 页面加载时创建背景
+        window.addEventListener('load', createMosaicBackground);
+
+        // 窗口大小改变时重新创建
+        window.addEventListener('resize', createMosaicBackground);
+
         // 图标转换函数
         async function convertIcon(imgUrl, format, size) {
             return new Promise((resolve, reject) => {
@@ -747,7 +1003,7 @@
                             case 'webp':
                                 if (!tempCanvas.toDataURL('image/webp').startsWith('data:image/webp')) {
                                     // 如果浏览器不支持WebP，回退到PNG
-                                    mimeType = 'image/png';
+                                mimeType = 'image/png';
                                     format = 'png';
                                 } else {
                                     mimeType = 'image/webp';
@@ -1098,7 +1354,7 @@
                             <div class="loading-step active">
                                 <div class="loading-step-icon">🔍</div>
                                 <span>正在解析域名...</span>
-                            </div>
+                        </div>
                             <div class="loading-step">
                                 <div class="loading-step-icon">🌐</div>
                                 <span>正在搜索图标来源...</span>
@@ -1213,11 +1469,11 @@
 
                                     clearTimeout(timeoutId);
                                     return URL.createObjectURL(blob);
-                                } catch (error) {
+                    } catch (error) {
                                     lastError = error;
-                                    continue;
-                                }
-                            }
+                        continue;
+                    }
+                }
 
                             throw lastError || new Error('All proxy attempts failed');
                         } catch (error) {
